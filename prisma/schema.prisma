@@ -10,31 +10,54 @@ datasource db {
   provider = "postgresql"
 }
 
+//
+// ENUMS
+//
+
+enum Role {
+  ADMIN
+  TEACHER
+  STUDENT
+}
+
+enum ModuleType {
+  FREE
+  GOLD
+  DIAMOND
+}
+
+enum Currency {
+  COINS
+  DIAMONDS
+  MONEY
+}
+
 // -----------------------------
 // Utilisateurs
 // -----------------------------
 model User {
-  id          String        @id @default(uuid())
-  email       String        @unique
-  name        String?
-  role        String        // "admin", "teacher", "student"
-  wallet      Wallet?
-  courses     Course[]      @relation("TeacherCourses")
-  enrollments Enrollment[]
-  purchases   Purchase[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  name         String?
+  role         Role
+  password     String 
+  wallet       Wallet?
+  courses      Course[]      @relation("TeacherCourses")
+  enrollments  Enrollment[]
+  purchases    Purchase[]
   chatMessages ChatMessage[]
-  createdAt   DateTime      @default(now())
+  createdAt    DateTime      @default(now())
 }
 
 // -----------------------------
 // Wallet virtuel
 // -----------------------------
 model Wallet {
-  id        String  @id @default(uuid())
-  user      User    @relation(fields: [userId], references: [id])
-  userId    String  @unique
-  coins     Int     @default(0)
-  diamonds  Int     @default(0)
+  id       String @id @default(uuid())
+  user     User   @relation(fields: [userId], references: [id])
+  userId   String @unique
+  coins    Int    @default(0)
+  diamonds Int    @default(0)
 }
 
 // -----------------------------
@@ -55,13 +78,13 @@ model Course {
 // Modules PDF
 // -----------------------------
 model PDFModule {
-  id        String  @id @default(uuid())
+  id        String     @id @default(uuid())
   title     String
-  type      String  // "Free", "Gold", "Diamond"
-  content   String  // URL ou chemin du PDF
-  summary   String? // Résumé généré par IA
+  type      ModuleType
+  content   String
+  summary   String?
   courseId  String
-  course    Course  @relation(fields: [courseId], references: [id])
+  course    Course     @relation(fields: [courseId], references: [id])
   purchases Purchase[]
 }
 
@@ -88,7 +111,7 @@ model Purchase {
   user      User      @relation(fields: [userId], references: [id])
   pdfModule PDFModule @relation(fields: [pdfId], references: [id])
   amount    Int
-  currency  String    // "coins", "diamonds", "money"
+  currency  Currency
   createdAt DateTime  @default(now())
 }
 
@@ -99,7 +122,7 @@ model QuizAttempt {
   id           String      @id @default(uuid())
   enrollmentId String
   enrollment   Enrollment  @relation(fields: [enrollmentId], references: [id])
-  questions    Json        // JSON des questions et réponses
+  questions    Json
   score        Int
   createdAt    DateTime    @default(now())
 }
