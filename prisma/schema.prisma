@@ -40,7 +40,7 @@ model User {
   email        String        @unique
   name         String?
   role         Role
-  password     String 
+  password     String?
   wallet       Wallet?
   courses      Course[]      @relation("TeacherCourses")
   enrollments  Enrollment[]
