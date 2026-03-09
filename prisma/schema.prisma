@@ -1,8 +1,6 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// -----------------------------
+// schema.prisma - Plateforme E-Learning Gamifiée
+// -----------------------------
 
 generator client {
   provider = "prisma-client-js"
@@ -12,9 +10,107 @@ datasource db {
   provider = "postgresql"
 }
 
+// -----------------------------
+// Utilisateurs
+// -----------------------------
 model User {
+  id          String        @id @default(uuid())
+  email       String        @unique
+  name        String?
+  role        String        // "admin", "teacher", "student"
+  wallet      Wallet?
+  courses     Course[]      @relation("TeacherCourses")
+  enrollments Enrollment[]
+  purchases   Purchase[]
+  chatMessages ChatMessage[]
+  createdAt   DateTime      @default(now())
+}
+
+// -----------------------------
+// Wallet virtuel
+// -----------------------------
+model Wallet {
+  id        String  @id @default(uuid())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @unique
+  coins     Int     @default(0)
+  diamonds  Int     @default(0)
+}
+
+// -----------------------------
+// Cours
+// -----------------------------
+model Course {
+  id          String       @id @default(uuid())
+  title       String
+  description String?
+  teacherId   String
+  teacher     User         @relation("TeacherCourses", fields: [teacherId], references: [id])
+  pdfModules  PDFModule[]
+  enrollments Enrollment[]
+  createdAt   DateTime     @default(now())
+}
+
+// -----------------------------
+// Modules PDF
+// -----------------------------
+model PDFModule {
+  id        String  @id @default(uuid())
+  title     String
+  type      String  // "Free", "Gold", "Diamond"
+  content   String  // URL ou chemin du PDF
+  summary   String? // Résumé généré par IA
+  courseId  String
+  course    Course  @relation(fields: [courseId], references: [id])
+  purchases Purchase[]
+}
+
+// -----------------------------
+// Inscriptions aux cours
+// -----------------------------
+model Enrollment {
+  id           String        @id @default(uuid())
+  userId       String
+  courseId     String
+  user         User          @relation(fields: [userId], references: [id])
+  course       Course        @relation(fields: [courseId], references: [id])
+  progress     Int           @default(0)
+  quizAttempts QuizAttempt[]
+}
+
+// -----------------------------
+// Historique des achats
+// -----------------------------
+model Purchase {
+  id        String    @id @default(uuid())
+  userId    String
+  pdfId     String
+  user      User      @relation(fields: [userId], references: [id])
+  pdfModule PDFModule @relation(fields: [pdfId], references: [id])
+  amount    Int
+  currency  String    // "coins", "diamonds", "money"
+  createdAt DateTime  @default(now())
+}
+
+// -----------------------------
+// Tentatives de quiz
+// -----------------------------
+model QuizAttempt {
+  id           String      @id @default(uuid())
+  enrollmentId String
+  enrollment   Enrollment  @relation(fields: [enrollmentId], references: [id])
+  questions    Json        // JSON des questions et réponses
+  score        Int
+  createdAt    DateTime    @default(now())
+}
+
+// -----------------------------
+// Messages du chatbot IA
+// -----------------------------
+model ChatMessage {
   id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
+  userId    String
+  content   String
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
 }
