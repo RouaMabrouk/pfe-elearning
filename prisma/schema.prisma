@@ -15,9 +15,9 @@ datasource db {
 //
 
 enum Role {
-  ADMIN
-  TEACHER
-  STUDENT
+  Admin
+  Teacher
+  Student
 }
 
 enum ModuleType {
