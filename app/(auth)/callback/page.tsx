@@ -60,11 +60,11 @@ export default function OAuthCallbackPage() {
 
                 // Redirect based on role
                 if (role === "Teacher") {
-                    router.push("/dashboards/teacher");
+                    router.push("/teacher");
                 } else if (role === "Student") {
-                    router.push("/dashboards/student");
+                    router.push("/student");
                 } else if (role === "Admin") {
-                    router.push("/dashboards/admin");
+                    router.push("/admin");
                 } else {
                     router.push("/"); // fallback
                 }
